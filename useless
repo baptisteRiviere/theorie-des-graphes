@@ -1,0 +1,209 @@
+               # J'ai peut être fait beaucoup plus compliqué que prévu pour cette fonction,
+                # Je calcule tout d'abord les distances des segments qui pourraient remplacer les diagonales
+
+                L1a = dist_eucl(x11,x21,y11,y21) 
+                L1b = dist_eucl(x22,x12,y22,y12)
+                L2a = dist_eucl(x11,x22,y11,y22) 
+                L2b = dist_eucl(x12,x21,y12,y21)
+
+
+				# Je compare la longueur de ces segments pour prendre le plus petit et optimiser la solution du problème
+                if L1a + L1b > L2a + L2b:
+                    CYCLE.add_edge(n11, n21,weight = L1a)
+                    CYCLE.add_edge(n22, n12,weight = L1b)
+                    # Cette condition s'applique si on l'algorithme sépare le cycle en deux cycles, on change alors de segments pour compléter
+                    if len(nx.find_cycle(CYCLE)) < len(CYCLE.nodes):
+                        CYCLE.remove_edge(n11,n21)
+                        CYCLE.remove_edge(n22,n12)
+                        CYCLE.add_edge(n11, n22,weight = L2a)
+                        CYCLE.add_edge(n12, n21,weight = L2b)
+                else:
+                    CYCLE.add_edge(n11, n22,weight = L2a)
+                    CYCLE.add_edge(n12, n21,weight = L2b)
+                    if len(nx.find_cycle(CYCLE)) < len(CYCLE.nodes):
+                        CYCLE.remove_edge(n11,n22)
+                        CYCLE.remove_edge(n12,n21)
+                        CYCLE.add_edge(n11, n21,weight = L1a)
+                        CYCLE.add_edge(n22, n12,weight = L1b)
+                repaired = True
+                break
+			
+
+        if (repaired):
+            break
+
+    return repaired
+
+
+
+
+
+
+
+"""
+G = nx.complete_graph(5)
+
+print(len(G))      # Nombre de sommets  -> 5
+print(G.size())    # Nombre d'arêtes -> 10
+
+
+
+nx.draw(G)
+plt.show()
+"""
+
+if intersection:
+
+                
+                
+                L1a = dist_eucl(x11,x21,y11,y21) 
+                L1b = dist_eucl(x22,x12,y22,y12)
+                L2a = dist_eucl(x11,x22,y11,y22) 
+                L2b = dist_eucl(x12,x21,y12,y21)
+
+				# Ajout de 2 nouveaux arcs
+                if L1a + L1b < L2a + L2b:
+                    
+                    CYCLE.add_edge(n11, n21,weight = L1a)
+                    CYCLE.add_edge(n22, n12,weight = L1b)
+                    """
+                    if len(nx.find_cycle(CYCLE)) < len(CYCLE.nodes):
+                        CYCLE.remove_edge(n11,n21)
+                        CYCLE.remove_edge(n22,n12)
+                        CYCLE.add_edge(n11, n22,weight = L2a)
+                        CYCLE.add_edge(n12, n21,weight = L2b)
+                    """
+                else:
+                    CYCLE.add_edge(n11, n22,weight = L2a)
+               
+                    CYCLE.add_edge(n12, n21,weight = L2b)
+                    """
+                    if len(nx.find_cycle(CYCLE)) < len(CYCLE.nodes):
+                        CYCLE.remove_edge(n11,n22)
+                        CYCLE.remove_edge(n12,n21)
+                        CYCLE.add_edge(n11, n21,weight = L1a)
+                        CYCLE.add_edge(n22, n12,weight = L1b)
+                    """
+                
+
+
+                repaired = True
+                break
+
+
+Node_list = list(G.nodes) # retourne liste [0,1,2...,9]
+Edge_list = list(G.edges) # renvoie [(0,1),(0,2)...(8,9)]
+Voisins = list(G.adj[1])
+a = G[0][1]['weight']
+
+
+
+
+def création_graph_Kn(Tab):
+    """
+    pos = {0: (40, 20), 1: (20, 30), 2: (40, 30), 3: (30, 10)} 
+    X.add_nodes_from(pos.keys())
+    for n, p in pos.iteritems():
+    X.nodes[n]['pos'] = p
+    print(nx.spring_layout(G))
+    """
+    n = len(Tab)
+    # Initialisation du graphe
+    G = nx.Graph()
+    pos = {}
+    for i in range(len(Tab)):
+        pos[i] = Tab[i]
+
+
+    for i in range(n):
+        (x,y) = Tab[i]
+        G.add_node(i) # Ajoute un sommet d'indice i 
+        G.nodes[i]['pos'] = (x,y) # Position du noeud
+        for j in range(0,i):
+            [x_j,y_j] = Tab[j]
+            dist_eucl = math.sqrt((x - x_j)**2+(y - y_j)**2)
+            G.add_edge (i,j, weight = dist_eucl) 
+            # Ajoute un arc de cout wij entre les sommets i et j.
+    return G
+
+
+### RIP MON TRAVAIL
+
+
+def distance_min(liste,G):
+    # [(5,6),(6,8)]
+    ind_min = 0
+    (Pmin_1,Pmin_2) = liste[0]
+    val_min = G[Pmin_1][Pmin_2]['weight']
+    for i in range(len(liste)):
+        (P1,P2) = liste[i]
+        val_test = G[P1][P2]['weight']
+        if val_test < val_min :
+            ind_min = i
+            Pmin_1,Pmin_2 = P1,P2
+            val_min = val_test
+    return ind_min,val_min
+
+# Algo de Kruskal
+def Kruskal(G):
+    # on initialise les listes utiles pour la suite :
+    Edge_list_dispo = list(G.edges) # liste des arcs dispo
+    Nodes_in_G = list(G.nodes) # liste des noeuds de G
+    Nodes_in_T = [] # liste des noeuds dans T
+    Edges_in_T = [] # liste des arcs dans T
+
+    # Initialisation de T
+    T = nx.create_empty_copy(G)
+
+    # On cherche l'indice de l'arc avec le poids le plus faible dans la liste des arcs dispo
+    ind_min,val_min = distance_min(Edge_list_dispo,G)
+    # puis on l'ajoute dans le graphe
+    
+    # On peut mettre l'arc et ses points dans les listes adéquates et dans le graphe
+    (P1,P2) = Edge_list_dispo.pop(ind_min)
+    Edges_in_T.append((P1,P2))
+    Nodes_in_T += [P1,P2]
+    T.add_edge(P1,P2,weight = val_min)
+
+    # on parcourt la liste des arcs disponibles tant qu'elle n'est pas vide
+    while(len(Edge_list_dispo)) != 0 :
+        # on cherche l'arc de poids minimal et on implémente les listes
+        ind_min,val_min = distance_min(Edge_list_dispo,G)
+        (P1,P2) = Edge_list_dispo.pop(ind_min)
+        Edges_in_T.append((P1,P2))
+        T.add_edge(P1,P2,weight = val_min)
+        for P in (P1,P2):
+            if P not in Nodes_in_T:
+                Nodes_in_T.append(P)
+
+        # on recherche les arcs qui pourraient fermer des boucles pour les supprimer de la liste des arcs dispo
+        for (P1,P2) in Edge_list_dispo:
+            T2 = T.copy()
+            T2.add_edge(P1,P2)
+            try :
+                nx.find_cycle(T2)
+                Edge_list_dispo.remove((P1,P2))
+            except :
+                pass
+            
+    return T
+
+
+    ### RIP LE TRAVAIL DE LUBIN
+
+    
+# Algo de Prim
+
+def Prim(G):
+    T = []
+    sommet_voisin = []
+    Node_list = list(G.nodes)
+    Edge_list_dispo = list(G.edges)
+    sommet_1 = Node_list[0] # On part d'un sommet quelconque (le premier ici)
+    for i in range(len(Node_list)):
+        ind_min = distance_min(Edge_list_dispo,G)
+        print(Edge_list_dispo[ind_min])
+        
+        pass
+
+    
